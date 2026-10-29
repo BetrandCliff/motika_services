@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Service {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String
+  category    String
+  priceXaf    Int
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  bookings    Booking[]
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  reference      String        @unique
+  serviceId      String
+  service        Service       @relation(fields: [serviceId], references: [id])
+  customerName   String
+  customerEmail  String
+  customerPhone  String
+  details        String
+  deadline       DateTime?
+  amountXaf      Int
+  currency       String        @default("XAF")
+  status         BookingStatus @default(PENDING)
+  paymentStatus  PaymentStatus @default(UNPAID)
+  paymentTxRef   String?       @unique
+  flutterwaveId  String?
+  paymentUrl     String?
+  paidAt         DateTime?
+  adminNotes     String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([createdAt])
+  @@index([status, paymentStatus])
+  @@index([customerEmail])
+}
+
+model ProcessedWebhook {
+  id        String   @id @default(cuid())
+  eventKey  String   @unique
+  createdAt DateTime @default(now())
+}

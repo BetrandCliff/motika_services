@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: motika_services
+      POSTGRES_USER: motika
+      POSTGRES_PASSWORD: motika_local_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - motika_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U motika -d motika_services"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  motika_postgres_data:
